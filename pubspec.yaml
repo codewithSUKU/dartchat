@@ -1,0 +1,37 @@
+name: dartchat
+description: A new Flutter project.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^0.1.2
+
+  mongo_dart: any
+  http_server: any
+  http: any
+  shared_preferences: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+   - assets/images/
+   
+  fonts:
+    - family: Anton
+      fonts:
+        - asset: assets/fonts/Anton-Regular.ttf
+    - family: MaShanZheng
+      fonts:
+        - asset: assets/fonts/MaShanZheng-Regular.ttf
