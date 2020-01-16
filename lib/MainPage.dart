@@ -96,15 +96,12 @@ class _LoginPageState extends State<LoginPage> {
         _store.set('token', token);
         final _token = _store.get(token);
 
-        // Navigator.of(context).pushNamed('/HomePage');
-        // print(_store.set('token', token));
-
         if (_token != '') {
           _store.set('token', token);
-          // print(token);
         }
       }
-    } else {
+    }
+    else {
       showDialog(
           context: context,
           builder: (context) {
@@ -122,8 +119,6 @@ class _LoginPageState extends State<LoginPage> {
             );
           });
     }
-    // return _loginRequest();
-    // print (token);
   }
 
   @override

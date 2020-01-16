@@ -9,9 +9,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: MainPage(),
-      // routes: <String,WidgetBuilder>{
-      //   '/SignUpPage': (BuildContext context)=> new SignUpPage(),
-      // },
+      theme: ThemeData(
+        primarySwatch: Colors.pink,
+      ),
     );
   }
 }
