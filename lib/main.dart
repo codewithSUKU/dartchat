@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:dartchat/MainPage.dart';
+import 'package:dartchat/screens/MainPage.dart';
 
 void main() => runApp(MyApp());
 
@@ -10,7 +10,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: MainPage(),
       theme: ThemeData(
-        primarySwatch: Colors.pink,
+        primarySwatch: Colors.teal,
+        accentColor: Colors.white
       ),
     );
   }

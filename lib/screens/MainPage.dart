@@ -1,4 +1,3 @@
-import 'package:dartchat/globalState.dart';
 import 'package:dartchat/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:core';
@@ -6,6 +5,8 @@ import 'package:dartchat/signup/sign.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+// import '../token.dart';
 
 class MainPage extends StatelessWidget {
   @override
@@ -27,7 +28,6 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _password = new TextEditingController();
 
   final formKey = new GlobalKey<FormState>();
-  GlobalState _store = GlobalState.instance;
 
   @override
   void dispose() {
@@ -51,7 +51,22 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<List> _loginRequest() async {
+  _save(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'token';
+    final value = token;
+    prefs.setString(key, value);
+    print('save : $value');
+  }
+
+  read() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'token';
+    final value = prefs.get(key ) ?? 0;
+    print('read : $value');
+  }
+
+  Future<void> _loginRequest() async {
     var userName = _username.text;
     var pasSWord = _password.text;
 
@@ -59,6 +74,7 @@ class _LoginPageState extends State<LoginPage> {
       'userName': userName.toString(),
       'pasSWord': pasSWord.toString()
     };
+
     if (_validateAndSave()) {
       final response = await http.post('http://15.206.162.58:3000/user/login/',
           headers: {"Accept": "application/json"}, body: data);
@@ -93,12 +109,9 @@ class _LoginPageState extends State<LoginPage> {
           }),
         );
         final token = res['token'];
-        _store.set('token', token);
-        final _token = _store.get(token);
 
-        if (_token != '') {
-          _store.set('token', token);
-        }
+        _save(token);
+
       }
     }
     else {

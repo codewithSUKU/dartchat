@@ -1,3 +1,4 @@
+import 'package:dartchat/screens/MainPage.dart';
 import 'package:flutter/material.dart';
 import 'package:dartchat/widegets/category_selector.dart';
 import 'package:dartchat/widegets/favorite_contacts.dart';
@@ -31,6 +32,25 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.search),
+            iconSize: 30.0,
+            color: Colors.white,
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: Icon(Icons.exit_to_app),
+            iconSize: 30.0,
+            color: Colors.white,
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) {
+                  return LoginPage();
+                }),
+              );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.delete),
             iconSize: 30.0,
             color: Colors.white,
             onPressed: () {},

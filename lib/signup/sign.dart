@@ -58,7 +58,7 @@ class _SignUpPageState extends State<SignUpPage> {
       final response = await http.post('http://15.206.162.58:3000/user/signUp/',
           headers: {"Accept": "application/json"}, body: data);
       var responseCode = response.statusCode;
-      print('$responseCode');
+      // print('$responseCode');
       // final res = json.decode(response.body);
 
       if (responseCode == 409) {
