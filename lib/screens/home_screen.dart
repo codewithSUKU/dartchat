@@ -1,8 +1,13 @@
+import 'package:dartchat/globalState.dart';
 import 'package:dartchat/screens/MainPage.dart';
 import 'package:flutter/material.dart';
 import 'package:dartchat/widegets/category_selector.dart';
 import 'package:dartchat/widegets/favorite_contacts.dart';
 import 'package:dartchat/widegets/recent_chats.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
+// import 'dart:convert';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -10,6 +15,60 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  GlobalState _store = GlobalState.instance;
+
+  _save(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'token';
+    final value = token;
+    prefs.setString(key, value);
+  }
+
+  remove() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove("value");
+  }
+
+  Future<void> _deleteCall() async {
+    final userName = _store.get('username');
+
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'token';
+    final value = prefs.get(key);
+    print(userName);
+    final response =
+        await http.delete('http://15.206.162.58:3000/user/$userName', headers: {
+      "Accept": "application/json",
+      "Authorization": "Bearer $value",
+    });
+    var responseCode = response.statusCode;
+    // print('$responseCode');
+    // final res = json.decode(response.body);
+    if (responseCode == 200) {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Deleted!"),
+              content: Text("User Deleted Successful"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('Ok'),
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) {
+                        return LoginPage();
+                      }),
+                    );
+                  },
+                )
+              ],
+            );
+          });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,6 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
             iconSize: 30.0,
             color: Colors.white,
             onPressed: () {
+              _save('0');
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) {
@@ -53,7 +113,9 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.delete),
             iconSize: 30.0,
             color: Colors.white,
-            onPressed: () {},
+            onPressed: () {
+              _deleteCall();
+            },
           ),
         ],
       ),

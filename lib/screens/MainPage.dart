@@ -1,3 +1,4 @@
+import 'package:dartchat/globalState.dart';
 import 'package:dartchat/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:core';
@@ -6,7 +7,6 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-// import '../token.dart';
 
 class MainPage extends StatelessWidget {
   @override
@@ -28,6 +28,7 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _password = new TextEditingController();
 
   final formKey = new GlobalKey<FormState>();
+  GlobalState _store = GlobalState.instance;
 
   @override
   void dispose() {
@@ -38,6 +39,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void initState() {
+    _username = _username;
+    _store.set('username', '$_username');
     super.initState();
   }
 
@@ -56,15 +59,22 @@ class _LoginPageState extends State<LoginPage> {
     final key = 'token';
     final value = token;
     prefs.setString(key, value);
-    print('save : $value');
+    if (value != '0') {
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) {
+            return HomeScreen();
+          }),
+        );
+    }
   }
 
-  read() async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'token';
-    final value = prefs.get(key ) ?? 0;
-    print('read : $value');
-  }
+  // read() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final key = 'token';
+  //   final value = prefs.get(key ) ?? 0;
+  //   print('read : $value');
+  // }
 
   Future<void> _loginRequest() async {
     var userName = _username.text;
@@ -75,11 +85,13 @@ class _LoginPageState extends State<LoginPage> {
       'pasSWord': pasSWord.toString()
     };
 
+    _store.set('username', userName);
+
     if (_validateAndSave()) {
       final response = await http.post('http://15.206.162.58:3000/user/login/',
           headers: {"Accept": "application/json"}, body: data);
       var responseCode = response.statusCode;
-      print('$responseCode');
+      // print('$responseCode');
       final res = json.decode(response.body);
 
       if (responseCode == 401) {
@@ -99,19 +111,11 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               );
             });
-        print("User Unauthorized");
+        // print("User Unauthorized");
       }
       else if (responseCode == 200) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) {
-            return HomeScreen();
-          }),
-        );
         final token = res['token'];
-
         _save(token);
-
       }
     }
     else {

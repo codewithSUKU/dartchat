@@ -1,8 +1,7 @@
+import 'package:dartchat/screens/MainPage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-// import 'dart:convert';
 import 'dart:core';
-// import 'dart:async';
 
 class SignupPage extends StatelessWidget {
   @override
@@ -78,8 +77,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ],
               );
             });
-      }
-      else if (responseCode == 500) {
+      } else if (responseCode == 500) {
         showDialog(
             context: context,
             builder: (context) {
@@ -96,8 +94,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ],
               );
             });
-      }
-      else if (responseCode == 200) {
+      } else if (responseCode == 201) {
         showDialog(
             context: context,
             builder: (context) {
@@ -108,30 +105,34 @@ class _SignUpPageState extends State<SignUpPage> {
                   FlatButton(
                     child: Text('Ok'),
                     onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) {
+                          return LoginPage();
+                        }),
+                      );
+                    },
+                  )
+                ],
+              );
+            });
+      } else {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text("Error"),
+                content: Text("Fields Can't be Empty."),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('Ok'),
+                    onPressed: () {
                       Navigator.pop(context);
                     },
                   )
                 ],
               );
             });
-      }
-      else {
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text("Error"),
-              content: Text("Fields Can't be Empty."),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text('Ok'),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                )
-              ],
-            );
-          });
       }
     }
   }
