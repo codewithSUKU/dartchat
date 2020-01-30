@@ -86,6 +86,7 @@ class _LoginPageState extends State<LoginPage> {
     };
 
     _store.set('username', userName);
+    _store.set('password', pasSWord);
 
     if (_validateAndSave()) {
       final response = await http.post('http://15.206.162.58:3000/user/login/',

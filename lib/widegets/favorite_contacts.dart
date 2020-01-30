@@ -1,8 +1,58 @@
+import 'package:dartchat/globalState.dart';
 import 'package:flutter/material.dart';
-import 'package:dartchat/models/message_model.dart';
 import 'package:dartchat/screens/chat_screen.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class FavoriteContacts extends StatelessWidget {
+class FavoriteContacts extends StatefulWidget {
+  @override
+  _FavoriteContactsState createState() => _FavoriteContactsState(); 
+}
+
+class _FavoriteContactsState extends State<FavoriteContacts> {
+
+  GlobalState _store = GlobalState.instance;
+  
+  Map data;
+  List userData;
+
+  Future getData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'token';
+    final value = prefs.get(key);
+
+    final username = _store.get('username');
+    final password = _store.get('password');
+
+    print("prefs $username");
+    print("prefs $password");
+    // Map cred = {
+
+    //   'userName': username,
+    //   'pasSWord': password
+    // }; 
+
+    http.Response response =
+        await http.get('http://15.206.162.58:3000/chat/', headers: {
+      "Accept": "application/json",
+      "Authorization": "Bearer $value",
+    },
+    // body: cred,
+    );
+    data = json.decode(response.body);
+    
+    setState(() {
+      userData = data["users"];
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -37,31 +87,39 @@ class FavoriteContacts extends StatelessWidget {
           Container(
             height: 120.0,
             child: ListView.builder(
-              padding: EdgeInsets.only(left: 10.0),
+              padding: EdgeInsets.only(left: 8.0, right: 10.0),
               scrollDirection: Axis.horizontal,
-              itemCount: favorites.length,
+              itemCount: userData == null ? 0 : userData.length,
               itemBuilder: (BuildContext context, int index) {
+                final img = userData[index];
+                // debugPrint(img["avatar"]);
                 return GestureDetector(
                   onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ChatScreen(
-                        user: favorites[index],
-                      ),
-                    ),
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChatScreen(),
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.all(10.0),
+                ),
+                  child: Container(
+                    margin: EdgeInsets.only(
+                      left: 6.0,
+                      right: 12.0,
+                      top: 5.0,
+                      bottom: 10.0,
+
+                    ),
+                    child: Padding(
+                    padding: EdgeInsets.only(left:10.0),
                     child: Column(
                       children: <Widget>[
                         CircleAvatar(
-                          radius: 35.0,
-                          backgroundImage:
-                          AssetImage(favorites[index].imageUrl),
+                          radius: 34.8,
+                          backgroundImage: NetworkImage('http://15.206.162.58:3000/' + img["avatar"]),
                         ),
+                        
                         SizedBox(height: 6.0),
                         Text(
-                          favorites[index].name,
+                          img["name"],
                           style: TextStyle(
                             color: Colors.blueGrey,
                             fontSize: 16.0,
@@ -70,6 +128,7 @@ class FavoriteContacts extends StatelessWidget {
                         ),
                       ],
                     ),
+                  ),
                   ),
                 );
               },

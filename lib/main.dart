@@ -10,11 +10,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: MainPage(),
       theme: ThemeData(
-        primarySwatch: Colors.teal,
+        primarySwatch: Colors.blueGrey,
+        // brightness: Brightness.dark,
         accentColor: Colors.white
       ),
     );
   }
 }
-
-//auth: new Auth()

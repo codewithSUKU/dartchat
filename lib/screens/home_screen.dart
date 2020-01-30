@@ -2,12 +2,11 @@ import 'package:dartchat/globalState.dart';
 import 'package:dartchat/screens/MainPage.dart';
 import 'package:flutter/material.dart';
 import 'package:dartchat/widegets/category_selector.dart';
-import 'package:dartchat/widegets/favorite_contacts.dart';
-import 'package:dartchat/widegets/recent_chats.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
-// import 'dart:convert';
+import '../widegets/favorite_contacts.dart';
+import '../widegets/recent.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -31,19 +30,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _deleteCall() async {
     final userName = _store.get('username');
-
     final prefs = await SharedPreferences.getInstance();
     final key = 'token';
     final value = prefs.get(key);
-    print(userName);
+    // print(userName);
     final response =
         await http.delete('http://15.206.162.58:3000/user/$userName', headers: {
       "Accept": "application/json",
       "Authorization": "Bearer $value",
     });
     var responseCode = response.statusCode;
-    // print('$responseCode');
-    // final res = json.decode(response.body);
+    
     if (responseCode == 200) {
       showDialog(
           context: context,
@@ -68,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
           });
     }
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
