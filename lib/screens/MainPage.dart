@@ -153,11 +153,24 @@ class _LoginPageState extends State<LoginPage> {
             colorBlendMode: BlendMode.darken,
           ),
           Container(
-            margin: EdgeInsets.only(top: 120.0),
+            margin: EdgeInsets.only(top: 100.0),
             padding: EdgeInsets.all(1.0),
             alignment: Alignment.topCenter,
             child: Text(
-              "Wellcome Aliens",
+              "DartChat",
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 25.0,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 150.0),
+            padding: EdgeInsets.all(1.0),
+            alignment: Alignment.topCenter,
+            child: Text(
+              "Please Login",
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: 25.0,
