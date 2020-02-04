@@ -1,7 +1,12 @@
-import 'package:dartchat/screens/MainPage.dart';
+import 'dart:convert';
+import 'package:dartchat/globalState.dart';
+import 'package:dartchat/screens/home_screen.dart';
+import 'package:dartchat/signup/imgPicker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:core';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignupPage extends StatelessWidget {
   @override
@@ -26,6 +31,7 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController mobile = new TextEditingController();
 
   final formKey = new GlobalKey<FormState>();
+  GlobalState _store = GlobalState.instance;
 
   bool _validateAndSave() {
     final form = formKey.currentState;
@@ -57,8 +63,6 @@ class _SignUpPageState extends State<SignUpPage> {
       final response = await http.post('http://15.206.162.58:3000/user/signUp/',
           headers: {"Accept": "application/json"}, body: data);
       var responseCode = response.statusCode;
-      // print('$responseCode');
-      // final res = json.decode(response.body);
 
       if (responseCode == 409) {
         showDialog(
@@ -105,12 +109,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   FlatButton(
                     child: Text('Ok'),
                     onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) {
-                          return LoginPage();
-                        }),
-                      );
+                      _loginRequest();
                     },
                   )
                 ],
@@ -137,6 +136,56 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
+
+  _save(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'token';
+    final value = token;
+    prefs.setString(key, value);
+    if (value != '0') {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) {
+          return ProfileMaker(
+              user: username.text,
+              mail: email.text,
+              currentUser: username.text,
+              authKey: value 
+            );
+        }),
+      );
+    }
+  }
+
+  Future<void> _loginRequest() async {
+    var userName = username.text;
+    var pasSWord = password.text;
+
+    Map data = {
+      'userName': userName.toString(),
+      'pasSWord': pasSWord.toString()
+    };
+
+    _store.set('username', userName);
+    _store.set('password', pasSWord);
+
+    if (_validateAndSave()) {
+      final response = await http.post('http://15.206.162.58:3000/user/login/',
+          headers: {"Accept": "application/json"}, body: data);
+      var responseCode = response.statusCode;
+      // print('$responseCode');
+      final res = json.decode(response.body);
+
+      if (responseCode == 401) {
+        print("User Unauthorized");
+      } else if (responseCode == 200) {
+        final token = res['token'];
+        _save(token);
+      }
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,6 +194,12 @@ class _SignUpPageState extends State<SignUpPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_left),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       resizeToAvoidBottomPadding: false,
       body: Stack(
@@ -157,20 +212,20 @@ class _SignUpPageState extends State<SignUpPage> {
             colorBlendMode: BlendMode.darken,
           ),
           Container(
-            margin: EdgeInsets.only(top: 75.0),
+            margin: EdgeInsets.only(top: 100.0),
             padding: EdgeInsets.all(10.0),
             alignment: Alignment.topCenter,
             child: Text(
-              "Wellcome Aliens",
+              "ENTER YOUR DETAILS TO SIGNUP",
               style: TextStyle(
                 color: Colors.white70,
-                fontSize: 25.0,
+                fontSize: 20.0,
                 fontWeight: FontWeight.w900,
               ),
             ),
           ),
           Container(
-            margin: EdgeInsets.only(top: 150.0),
+            margin: EdgeInsets.only(top: 250.0),
             padding: EdgeInsets.all(5.0),
             alignment: Alignment.center,
             child: CustomScrollView(
@@ -237,33 +292,6 @@ class _SignUpPageState extends State<SignUpPage> {
                                               vertical: 10.0,
                                             ),
                                             child: TextFormField(
-                                              controller: name,
-                                              autocorrect: false,
-                                              autofocus: false,
-                                              style: TextStyle(
-                                                fontSize: 15.0,
-                                              ),
-                                              validator: (value) =>
-                                                  value.isEmpty
-                                                      ? 'name can\'t be empty'
-                                                      : null,
-                                              onSaved: (value) => name.value,
-                                              decoration: InputDecoration(
-                                                hintText: "Name",
-                                                labelText: "Enter Your Name",
-                                                border: InputBorder.none,
-                                                filled: true,
-                                                fillColor: Colors.white38,
-                                                contentPadding:
-                                                    EdgeInsets.all(5.0),
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(
-                                              vertical: 10.0,
-                                            ),
-                                            child: TextFormField(
                                               controller: email,
                                               autocorrect: false,
                                               autofocus: false,
@@ -308,34 +336,6 @@ class _SignUpPageState extends State<SignUpPage> {
                                                 hintText: "password *",
                                                 labelText:
                                                     "Enter Your Password *",
-                                                border: InputBorder.none,
-                                                filled: true,
-                                                fillColor: Colors.white38,
-                                                contentPadding:
-                                                    EdgeInsets.all(5.0),
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(
-                                              vertical: 10.0,
-                                            ),
-                                            child: TextFormField(
-                                              controller: mobile,
-                                              autocorrect: false,
-                                              autofocus: false,
-                                              style: TextStyle(
-                                                fontSize: 15.0,
-                                              ),
-                                              validator: (value) =>
-                                                  value.isEmpty
-                                                      ? 'mobile can\'t be empty'
-                                                      : null,
-                                              onSaved: (value) => mobile.value,
-                                              decoration: InputDecoration(
-                                                hintText: "Mobile",
-                                                labelText:
-                                                    "Enter Your Mobile Number",
                                                 border: InputBorder.none,
                                                 filled: true,
                                                 fillColor: Colors.white38,

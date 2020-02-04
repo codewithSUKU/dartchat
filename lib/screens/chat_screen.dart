@@ -1,4 +1,4 @@
-import 'package:dartchat/globalState.dart';
+// import 'package:dartchat/globalState.dart';
 import 'package:dartchat/models/chat.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,13 +7,21 @@ import 'dart:convert';
 
 
 class ChatScreen extends StatefulWidget {
+
+  final String sender;
+  final String avatar;
+  ChatScreen({
+    this.sender,
+    this.avatar,
+  });
+
   @override
   ChatScreenState createState() => ChatScreenState();
 }
 
 class ChatScreenState extends State<ChatScreen> {
 
-  GlobalState _store = GlobalState.instance;
+  // GlobalState _store = GlobalState.instance;
   
   final TextEditingController _messageController = TextEditingController();
 
@@ -21,7 +29,8 @@ class ChatScreenState extends State<ChatScreen> {
 
   Map data;
   List userData;
-
+  final String avatarUrl = 'http://15.206.162.58:3000/';
+  
   Future getData() async {
     final prefs = await SharedPreferences.getInstance();
     final key = 'token';
@@ -35,6 +44,7 @@ class ChatScreenState extends State<ChatScreen> {
     data = json.decode(response.body);
     setState(() {
       userData = data["data"];
+      // print("${_store.get("user")}");
     });
     // print();
   }
@@ -107,8 +117,27 @@ class ChatScreenState extends State<ChatScreen> {
       backgroundColor: Theme.of(context).primaryColor,
       resizeToAvoidBottomPadding: true,
       appBar: AppBar(
-        title: Text(
-          _store.get('username'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_left),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Container(
+          child: Row(
+            children: <Widget>[
+              CircleAvatar(
+                radius: 25.0,
+                backgroundImage: NetworkImage(avatarUrl + widget.avatar),
+              ),
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(left: 15.0),
+                  child: Text(widget.sender),
+                ),
+              ),
+            ],
+          ),
         ),
         elevation: 0.0,
         actions: <Widget>[

@@ -1,5 +1,6 @@
 import 'package:dartchat/globalState.dart';
 import 'package:dartchat/screens/home_screen.dart';
+// import 'package:dartchat/signup/imgPicker.dart';
 import 'package:flutter/material.dart';
 import 'dart:core';
 import 'package:dartchat/signup/sign.dart';
