@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:dartchat/globalState.dart';
-import 'package:dartchat/screens/home_screen.dart';
 import 'package:dartchat/signup/imgPicker.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -46,17 +45,13 @@ class _SignUpPageState extends State<SignUpPage> {
 
   void _validateAndSubmit() async {
     var userName = username.text;
-    var naMe = name.text;
     var userEmail = email.text;
     var pasSWord = password.text;
-    var userMobile = mobile.text;
 
     Map data = {
-      'name': naMe.toString(),
       'userName': userName.toString(),
       'userEmail': userEmail.toString(),
       'pasSWord': pasSWord.toString(),
-      'userMobile': userMobile.toString(),
     };
 
     if (_validateAndSave()) {

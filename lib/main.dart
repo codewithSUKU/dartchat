@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
       home: MainPage(),
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
-        brightness: Brightness.light,
+        // brightness: Brightness.light,
         accentColor: Colors.grey[300]
       ),
     );

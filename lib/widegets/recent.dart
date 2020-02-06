@@ -1,8 +1,8 @@
 // import 'package:dartchat/globalState.dart';
 import 'package:dartchat/screens/chat_screen.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class RecentChats extends StatefulWidget {
@@ -15,22 +15,31 @@ class _RecentChatScreen extends State<RecentChats> {
 
   Map data;
   List userData;
-  final String avatarUrl = 'http://15.206.162.58:3000/';
+  final avatarUrl = 'http://15.206.162.58:3000/';
+  bool loading = false;
 
   Future getData() async {
     final prefs = await SharedPreferences.getInstance();
     final key = 'token';
     final value = prefs.get(key);
-    // print("token: $value");
-    http.Response response =
-        await http.get('http://15.206.162.58:3000/chat/', headers: {
-      "Accept": "application/json",
-      "Authorization": "Bearer $value",
-    });
-    data = json.decode(response.body);
+
+    Dio dio = Dio();
+          dio.options.headers['Accept'] = "application/json";
+          dio.options.headers['Authorization'] = "Bearer $value";
+          dio.options.followRedirects = false;
+    
+    var response = await dio.get("http://15.206.162.58:3000/chat/");
+    var res = json.encode(response.data);
+    final data = json.decode(res);
+    // var responseCode = response.statusCode;
+    // print('Dio responseCode : $responseCode');
+
+    var result = data["users"];
+
     setState(() {
-      userData = data["users"];
+      userData = result;
     });
+
   }
 
   @override
@@ -58,16 +67,17 @@ class _RecentChatScreen extends State<RecentChats> {
           child: ListView.builder(
             itemCount: userData == null ? 0 : userData.length,
             itemBuilder: (BuildContext context, int index) {
-              final chat = userData[index];
-              // print(chat["name"]);
+              final data = userData[index];
+              
+              print(data["name"]);
               
               return GestureDetector(
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => ChatScreen(
-                      sender: chat['name'],
-                      avatar: chat['avatar'],
+                      sender: data['name'],
+                      avatar: data['avatar'],
                     ),
                     
                   ),
@@ -92,14 +102,25 @@ class _RecentChatScreen extends State<RecentChats> {
                       Row(
                         children: <Widget>[
                           CircleAvatar(
-                            radius: 27.0,
-                            backgroundImage:  NetworkImage(avatarUrl + chat["avatar"]),
+                            radius: 35.0,
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: loading ? Container(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  CircularProgressIndicator(),
+                                ],
+                              ),
+                            ) : Text("No Data"),
+                            ),
+                            // backgroundImage:  NetworkImage(avatarUrl + data["avatar"]),
                           ),
                           SizedBox(width: 10.0,),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              Text(chat['name'],
+                              Text(data['name'],
                               style: TextStyle(
                                 color: Colors.blueGrey,
                                 fontSize: 20.0,
@@ -107,7 +128,7 @@ class _RecentChatScreen extends State<RecentChats> {
                               ),
                               ),
                               SizedBox(height: 5.0,),
-                              Text(chat['sender'],
+                              Text(data['sender'],
                               style: TextStyle(
                                 color: Colors.black38,
                                 fontSize: 13.0,
@@ -118,7 +139,7 @@ class _RecentChatScreen extends State<RecentChats> {
                               Container(
                                 width: MediaQuery.of(context).size.width * 0.45,
                                 child: Text(
-                                  chat['about'],
+                                  data['about'],
                                   style: TextStyle(
                                     color: Colors.grey,
                                     fontSize: 15.0,

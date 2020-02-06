@@ -17,6 +17,8 @@ dependencies:
   http: any
   shared_preferences: any
   image_picker: any
+  dio: any
+  path_provider: any
 
 dev_dependencies:
   flutter_test:

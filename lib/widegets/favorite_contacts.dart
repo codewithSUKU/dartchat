@@ -1,8 +1,8 @@
 // import 'dart:io';
-import 'package:dartchat/globalState.dart';
+// import 'package:dartchat/globalState.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:dartchat/screens/chat_screen.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,7 +12,7 @@ class FavoriteContacts extends StatefulWidget {
 }
 
 class _FavoriteContactsState extends State<FavoriteContacts> {
-  GlobalState _store = GlobalState.instance;
+  // GlobalState _store = GlobalState.instance;
 
   Map data;
   List userData;
@@ -23,35 +23,21 @@ class _FavoriteContactsState extends State<FavoriteContacts> {
     final key = 'token';
     final value = prefs.get(key);
 
-    final username = _store.get('username');
-    final password = _store.get('password');
-
-    print("prefs : $username");
-    print("prefs : $password");
-    print("token : $value");
-    // Map cred = {
-
-    //   'userName': username,
-    //   'pasSWord': password
-    // };
-
-    http.Response response = await http.get(
-      'http://15.206.162.58:3000/chat/',
-      headers: {
-        "Accept": "application/json",
-        "Authorization": "Bearer $value",
-      },
-      // body: cred,
-    );
-    data = json.decode(response.body);
+    Dio dio = Dio();
+          dio.options.headers['Accept'] = "application/json";
+          dio.options.headers['Authorization'] = "Bearer $value";
+          dio.options.followRedirects = false;
     
-    final result = data["users"];
-    
-    
+    var response = await dio.get("http://15.206.162.58:3000/chat/");
+    var res = json.encode(response.data);
+    final data = json.decode(res);
+
+    var result = data["users"];
+
     setState(() {
       userData = result;
     });
-    
+
   }
 
   @override

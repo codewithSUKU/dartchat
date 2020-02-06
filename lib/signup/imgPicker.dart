@@ -1,71 +1,55 @@
-import 'dart:convert';
+// import 'dart:convert';
 import 'dart:io';
 import 'package:dartchat/screens/MainPage.dart';
 import 'package:dartchat/screens/home_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:core';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
-import 'package:async/async.dart';
-
+import 'package:dio/dio.dart';
 
 class ProfileMaker extends StatelessWidget {
-  final String user;
-  final String mail;
-  final String currentUser;
-  final String authKey;
+  ProfileMaker({this.user, this.mail, this.currentUser, this.authKey});
 
-  ProfileMaker({
-    this.user,
-    this.mail,
-    this.currentUser,
-    this.authKey
-  });
+  final String authKey;
+  final String currentUser;
+  final String mail;
+  final String user;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomPadding: true,
       body: ProfileMakerScreen(
-        username: this.user,
-        email: this.mail,
-        sender: this.currentUser,
-        token: this.authKey
-      ),
+          username: this.user,
+          email: this.mail,
+          sender: this.currentUser,
+          token: this.authKey),
     );
   }
 }
 
 class ProfileMakerScreen extends StatefulWidget {
+  ProfileMakerScreen({this.username, this.email, this.sender, this.token});
 
-  final String username;
   final String email;
   final String sender;
   final String token;
-
-  ProfileMakerScreen({
-    this.username,
-    this.email,
-    this.sender,
-    this.token
-  });
+  final String username;
 
   @override
   State<StatefulWidget> createState() => _ProfileMakerState();
 }
 
 class _ProfileMakerState extends State<ProfileMakerScreen> {
-
-
-  TextEditingController name = new TextEditingController();
-  TextEditingController birthday = new TextEditingController();
   TextEditingController about = new TextEditingController();
-  TextEditingController mobile = new TextEditingController();
-
-
+  TextEditingController birthday = new TextEditingController();
   final formKey = new GlobalKey<FormState>();
-  
+  TextEditingController mobile = new TextEditingController();
+  TextEditingController name = new TextEditingController();
+
+  File _image;
+  bool uploading = false;
 
   bool _validateAndSave() {
     final form = formKey.currentState;
@@ -78,56 +62,93 @@ class _ProfileMakerState extends State<ProfileMakerScreen> {
     }
   }
 
-  File _image;
-
   Future _getImage() async {
     var image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
     setState(() {
-      _image = image;
-      // print(_image);
+      if (image != null) {
+        _image = image;
+      } else {
+        _image = null;
+      }
     });
   }
 
-  Future _validateAndSubmit() async {
-    
+  Future<void> _validateAndSubmit(BuildContext context) async {
     var userName = widget.username;
     var naMe = name.text;
     var birthDay = birthday.text;
     var aboutUser = about.text;
     var sendUser = widget.sender;
     var userMobile = mobile.text;
-    var avatar = basename(_image.path);
+    var avatar = _image != null ? basename(_image.path) : '';
 
-    // print('$avatar');
+    // print(avatar);
+    final avatarName = avatar.split("-").last;
+    // print(avatarName);
 
-    Map data = {
-      'username': userName.toString(),
-      'name': naMe.toString(),
-      'birthday': birthDay.toString(),
-      'about': aboutUser.toString(),
-      'sender': sendUser.toString(),
-      'mobile': userMobile.toString(),
-      'avatar': _image.path
-    };
+    try {
+      FormData data = FormData.fromMap({
+        "username": userName.toString(),
+        "name": naMe.toString(),
+        "birthday": birthDay.toString(),
+        "about": aboutUser.toString(),
+        "sender": sendUser.toString(),
+        "mobile": userMobile.toString(),
+        "avatar": _image != null
+            ? await MultipartFile.fromFile(_image.path,
+                filename: avatarName.toString())
+            : Text('Invalid Avatar'),
+      });
 
-    if (_validateAndSave()) {
-      var value = widget.token;
-      print(data);
-      print(avatar);
-      final response = await http.post('http://15.206.162.58:3000/chat/',
-          headers: {
-            "Accept": "application/json; charset=UTF-8",
-            "Authorization": "Bearer $value",
-          }, 
-          body: data);
-      var responseCode = response.statusCode;
-      print('$responseCode');
-      final res = json.decode(response.body);
-      print('$res');
+      if (_validateAndSave()) {
+        final token = widget.token;
 
+        try {
+          Dio dio = Dio();
+          dio.options.headers['Accept'] = "application/json";
+          dio.options.headers['Authorization'] = "Bearer $token";
+          dio.options.headers['Content-Type'] = "multipart/form-data";
+          dio.options.followRedirects = false;
 
+          var response =
+              await dio.post("http://15.206.162.58:3000/chat/", data: data);
+          // final res = json.encode(response.data);
+          // print('$res');
+          var responseCode = response.statusCode;
+          print('Dio responseCode : $responseCode');
 
+          if (responseCode == 201) {
+            var snackBar = SnackBar(
+              content: Text("Profile Created"),
+            );
+            Scaffold.of(context).showSnackBar(snackBar);
+
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) {
+                return HomeScreen();
+              }),
+            );
+          }
+        } on DioError catch (err) {
+          var responseCode = err.response.statusCode;
+          print(responseCode);
+          if (responseCode == 401) {
+            var snackBar = SnackBar(
+              content: Text("User Unauthorized"),
+            );
+            Scaffold.of(context).showSnackBar(snackBar);
+          } else if (responseCode == 409) {
+            var snackBar = SnackBar(
+              content: Text("Profile Already Exit"),
+            );
+            Scaffold.of(context).showSnackBar(snackBar);
+          }
+        }
+      }
+    } catch (err) {
+      print(err);
     }
   }
 
@@ -213,8 +234,8 @@ class _ProfileMakerState extends State<ProfileMakerScreen> {
                                             child: (_image != null)
                                                 ? Image.file(_image,
                                                     fit: BoxFit.fill)
-                                                : Image.network(
-                                                    "https://cdn4.iconfinder.com/data/icons/man-and-woman/154/man-human-person-login-512.png",
+                                                : Image.asset(
+                                                    'assets/images/demo-avatar.png',
                                                     fit: BoxFit.fill,
                                                   ),
                                           ),
@@ -302,10 +323,10 @@ class _ProfileMakerState extends State<ProfileMakerScreen> {
                                               style: TextStyle(
                                                 fontSize: 15.0,
                                               ),
-                                              validator: (value) => value
-                                                      .isEmpty
-                                                  ? 'age can\'t be empty'
-                                                  : null,
+                                              validator: (value) =>
+                                                  value.isEmpty
+                                                      ? 'age can\'t be empty'
+                                                      : null,
                                               onSaved: (value) =>
                                                   birthday.value,
                                               decoration: InputDecoration(
@@ -334,16 +355,14 @@ class _ProfileMakerState extends State<ProfileMakerScreen> {
                                               style: TextStyle(
                                                 fontSize: 15.0,
                                               ),
-                                              validator: (value) => value
-                                                      .isEmpty
-                                                  ? 'about can\'t be empty'
-                                                  : null,
-                                              onSaved: (value) =>
-                                                  about.value,
+                                              validator: (value) =>
+                                                  value.isEmpty
+                                                      ? 'about can\'t be empty'
+                                                      : null,
+                                              onSaved: (value) => about.value,
                                               decoration: InputDecoration(
                                                 hintText: "About",
-                                                labelText:
-                                                    "Describe Youreself",
+                                                labelText: "Describe Youreself",
                                                 border: InputBorder.none,
                                                 filled: true,
                                                 fillColor: Colors.white38,
@@ -397,8 +416,7 @@ class _ProfileMakerState extends State<ProfileMakerScreen> {
                                                         left: 50.0,
                                                         right: 50.0,
                                                         top: 10.0,
-                                                        bottom: 10.0
-                                                        ),
+                                                        bottom: 10.0),
                                                     child: Container(
                                                       alignment:
                                                           Alignment.center,
@@ -406,7 +424,8 @@ class _ProfileMakerState extends State<ProfileMakerScreen> {
                                                       child: MaterialButton(
                                                         minWidth: 120.0,
                                                         height: 50.0,
-                                                        color: Theme.of(context).primaryColor,
+                                                        color: Theme.of(context)
+                                                            .primaryColor,
                                                         padding: EdgeInsets
                                                             .symmetric(
                                                           horizontal: 10.0,
@@ -420,7 +439,19 @@ class _ProfileMakerState extends State<ProfileMakerScreen> {
                                                           ),
                                                         ),
                                                         onPressed: () {
-                                                          _validateAndSubmit();
+                                                          if (_image == null) {
+                                                            var snackBar =
+                                                                SnackBar(
+                                                              content: Text(
+                                                                  "Please Choose A Profile Picture & Fill Your Details."),
+                                                            );
+                                                            Scaffold.of(context)
+                                                                .showSnackBar(
+                                                                    snackBar);
+                                                          } else {
+                                                            _validateAndSubmit(
+                                                                context);
+                                                          }
                                                           // uploadPic(context);
                                                           // print("${widget.username}");
                                                           // print("${widget.email}");
