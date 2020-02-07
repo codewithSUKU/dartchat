@@ -9,12 +9,12 @@ import 'package:path/path.dart';
 import 'package:dio/dio.dart';
 
 class ProfileMaker extends StatelessWidget {
-  ProfileMaker({this.user, this.mail, this.currentUser, this.authKey});
-
   final String authKey;
   final String currentUser;
   final String mail;
   final String user;
+
+  ProfileMaker({this.user, this.mail, this.currentUser, this.authKey});
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +50,7 @@ class _ProfileMakerState extends State<ProfileMakerScreen> {
 
   File _image;
   bool uploading = false;
+  String progressString;
 
   bool _validateAndSave() {
     final form = formKey.currentState;
@@ -83,9 +84,7 @@ class _ProfileMakerState extends State<ProfileMakerScreen> {
     var userMobile = mobile.text;
     var avatar = _image != null ? basename(_image.path) : '';
 
-    // print(avatar);
     final avatarName = avatar.split("-").last;
-    // print(avatarName);
 
     try {
       FormData data = FormData.fromMap({
@@ -111,10 +110,24 @@ class _ProfileMakerState extends State<ProfileMakerScreen> {
           dio.options.headers['Content-Type'] = "multipart/form-data";
           dio.options.followRedirects = false;
 
-          var response =
-              await dio.post("http://15.206.162.58:3000/chat/", data: data);
-          // final res = json.encode(response.data);
-          // print('$res');
+          var response = await dio.post("http://15.206.162.58:3000/chat/",
+              data: data, onSendProgress: (int rec, int total) {
+
+            // print("Send : $rec , total : $total");
+          
+            setState(() {
+              uploading = true;
+              progressString = ((rec/total * 100).toString());
+              print(progressString);
+            });
+          });
+
+          setState(() {
+            uploading = false;
+            progressString = "Uploaded";
+            print(progressString);
+          });
+
           var responseCode = response.statusCode;
           print('Dio responseCode : $responseCode');
 
@@ -127,7 +140,10 @@ class _ProfileMakerState extends State<ProfileMakerScreen> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) {
-                return HomeScreen();
+                return HomeScreen(
+                  authKey: widget.token,
+                  user: widget.username,
+                );
               }),
             );
           }
@@ -155,6 +171,7 @@ class _ProfileMakerState extends State<ProfileMakerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.black,
       appBar: AppBar(

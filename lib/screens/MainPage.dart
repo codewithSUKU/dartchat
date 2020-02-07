@@ -64,7 +64,9 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) {
-            return HomeScreen();
+            return HomeScreen(
+              authKey: token,
+            );
           }),
         );
     }

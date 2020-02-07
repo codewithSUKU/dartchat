@@ -1,45 +1,45 @@
-import 'package:dartchat/globalState.dart';
 import 'package:dartchat/screens/MainPage.dart';
 import 'package:flutter/material.dart';
-import 'package:dartchat/widegets/category_selector.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:dartchat/widegets/category_selector.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import '../widegets/favorite_contacts.dart';
 import '../widegets/recent.dart';
 
 class HomeScreen extends StatefulWidget {
+
+  final String authKey;
+  final String user;
+  HomeScreen({this.authKey, this.user});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  GlobalState _store = GlobalState.instance;
 
   _save(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'token';
     final value = token;
-    prefs.setString(key, value);
+    print(value);
   }
 
-  remove() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove("value");
+  _remove(String token) async {
+    token = '0';
+
   }
 
   Future<void> _deleteCall() async {
-    final userName = _store.get('username');
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'token';
-    final value = prefs.get(key);
+    final userName = widget.user;
+    final token = widget.authKey;
     // print(userName);
+    // print(token);
     final response =
         await http.delete('http://15.206.162.58:3000/user/$userName', headers: {
       "Accept": "application/json",
-      "Authorization": "Bearer $value",
+      "Authorization": "Bearer $token",
     });
     var responseCode = response.statusCode;
+    
     
     if (responseCode == 200) {
       showDialog(
@@ -52,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 FlatButton(
                   child: Text('Ok'),
                   onPressed: () {
+                    _remove(token);
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (context) {
@@ -72,13 +73,13 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.menu),
+          icon: Icon(Icons.more_vert),
           iconSize: 30.0,
           color: Colors.white,
           onPressed: () {},
         ),
         title: Text(
-          'Chats',
+          'dartChat',
           style: TextStyle(
             fontSize: 28.0,
             fontWeight: FontWeight.bold,
@@ -118,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: <Widget>[
-          CategorySelector(),
+          // CategorySelector(),
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -130,8 +131,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: Column(
                 children: <Widget>[
-                  FavoriteContacts(),
-                  RecentChats(),
+                  FavoriteContacts(
+                    authKey: widget.authKey,
+                  ),
+                  RecentChats(
+                    authKey: widget.authKey,
+                  ),
                 ],
               ),
             ),
