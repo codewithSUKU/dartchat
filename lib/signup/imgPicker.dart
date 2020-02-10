@@ -112,60 +112,70 @@ class _ProfileMakerState extends State<ProfileMakerScreen> {
 
           var response = await dio.post("http://15.206.162.58:3000/chat/",
               data: data, onSendProgress: (int rec, int total) {
-
             // print("Send : $rec , total : $total");
-          
+
             setState(() {
               uploading = true;
-              progressString = ((rec/total * 100).toString());
+              progressString = ((rec / total * 100).toString());
               print(progressString);
             });
-          });
-
-          setState(() {
-            uploading = false;
-            progressString = "Uploaded";
-            print(progressString);
           });
 
           var responseCode = response.statusCode;
           print('Dio responseCode : $responseCode');
 
-          if (responseCode == 201) {
-            var snackBar = SnackBar(
-              content: Text("Profile Created"),
-            );
-            Scaffold.of(context).showSnackBar(snackBar);
+          setState(() {
+            uploading = false;
+          });
 
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) {
-                return HomeScreen(
-                  authKey: widget.token,
-                  user: widget.username,
-                );
-              }),
-            );
-          }
+          // if (responseCode == 201) {
+          // //   var snackBar = SnackBar(
+          // //     content: Text("Profile Created"),
+          // //   );
+          //   // Scaffold.of(context).showSnackBar(snackBar);
+
+          //   // Navigator.pushReplacement(
+          //   //   context,
+          //   //   MaterialPageRoute(builder: (context) {
+          //   //     return HomeScreen(
+          //   //       authKey: widget.token,
+          //   //       user: widget.username,
+          //   //     );
+          //   //   }),
+          //   // );
+          // }  
         } on DioError catch (err) {
           var responseCode = err.response.statusCode;
           print(responseCode);
-          if (responseCode == 401) {
-            var snackBar = SnackBar(
-              content: Text("User Unauthorized"),
-            );
-            Scaffold.of(context).showSnackBar(snackBar);
-          } else if (responseCode == 409) {
-            var snackBar = SnackBar(
-              content: Text("Profile Already Exit"),
-            );
-            Scaffold.of(context).showSnackBar(snackBar);
-          }
+          // if (responseCode == 401) {
+          //   // var snackBar = SnackBar(
+          //   //   content: Text("User Unauthorized"),
+          //   // );
+          //   // Scaffold.of(context).showSnackBar(snackBar);
+          // } else if (responseCode == 409) {
+          //   // var snackBar = SnackBar(
+          //   //   content: Text("Profile Already Exit"),
+          //   // );
+          //   // Scaffold.of(context).showSnackBar(snackBar);
+          // }
         }
       }
     } catch (err) {
       print(err);
     }
+
+    Future.delayed(Duration(milliseconds: 100), () {
+      Navigator.pushReplacement(
+        this.context,
+        MaterialPageRoute(builder: (context) {
+          return HomeScreen(
+            authKey: widget.token,
+            user: widget.username,
+          );
+        }),
+      );
+    });
+
   }
 
   @override
@@ -216,287 +226,337 @@ class _ProfileMakerState extends State<ProfileMakerScreen> {
             margin: EdgeInsets.only(top: 150.0),
             padding: EdgeInsets.all(5.0),
             alignment: Alignment.center,
-            child: CustomScrollView(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: false,
-              slivers: <Widget>[
-                new SliverPadding(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  sliver: new SliverList(
-                    delegate: new SliverChildBuilderDelegate(
-                      (context, index) => new Column(
+            child: uploading
+                // == false
+                ? Container(
+                    height: 150.0,
+                    width: 200.0,
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      border: Border.all(),
+                    ),
+                    child: Container(
+                      color: Colors.black54,
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          Container(
-                            margin: EdgeInsets.only(left: 35.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                SizedBox(
-                                  height: 20.0,
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Align(
-                                      alignment: Alignment.center,
-                                      child: CircleAvatar(
-                                        radius: 100.0,
-                                        backgroundColor:
-                                            Theme.of(context).splashColor,
-                                        child: ClipOval(
-                                          child: SizedBox(
-                                            width: 200.0,
-                                            height: 200.0,
-                                            child: (_image != null)
-                                                ? Image.file(_image,
-                                                    fit: BoxFit.fill)
-                                                : Image.asset(
-                                                    'assets/images/demo-avatar.png',
-                                                    fit: BoxFit.fill,
-                                                  ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.only(top: 130.0),
-                                      child: IconButton(
-                                        icon: Icon(
-                                          Icons.camera,
-                                          size: 30.0,
-                                          color: Theme.of(context).primaryColor,
-                                        ),
-                                        onPressed: () {
-                                          _getImage();
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                          CircularProgressIndicator(
+                            backgroundColor: Colors.blue,
                           ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(vertical: 0.0),
-                            child: Stack(
-                              children: <Widget>[
-                                SingleChildScrollView(
-                                  child: Container(
-                                    height: 510.0,
-                                    width: 320.0,
-                                    margin: EdgeInsets.only(top: 10.0),
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 10.0,
-                                      vertical: 10.0,
-                                    ),
-                                    child: Form(
-                                      key: formKey,
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: <Widget>[
-                                          SizedBox(
-                                            height: 10.0,
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(
-                                              vertical: 10.0,
-                                            ),
-                                            child: TextFormField(
-                                              controller: name,
-                                              autocorrect: false,
-                                              autofocus: false,
-                                              style: TextStyle(
-                                                fontSize: 15.0,
-                                              ),
-                                              validator: (value) =>
-                                                  value.isEmpty
-                                                      ? 'name can\'t be empty'
-                                                      : null,
-                                              onSaved: (value) => name.value,
-                                              decoration: InputDecoration(
-                                                hintText: "Name",
-                                                labelText: "Enter Your Name",
-                                                border: InputBorder.none,
-                                                filled: true,
-                                                fillColor: Colors.white38,
-                                                contentPadding:
-                                                    EdgeInsets.all(5.0),
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 10.0,
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(
-                                              vertical: 10.0,
-                                            ),
-                                            child: TextFormField(
-                                              controller: birthday,
-                                              autocorrect: false,
-                                              autofocus: false,
-                                              style: TextStyle(
-                                                fontSize: 15.0,
-                                              ),
-                                              validator: (value) =>
-                                                  value.isEmpty
-                                                      ? 'age can\'t be empty'
-                                                      : null,
-                                              onSaved: (value) =>
-                                                  birthday.value,
-                                              decoration: InputDecoration(
-                                                hintText: "Birthday",
-                                                labelText:
-                                                    "Enter Your Birthday",
-                                                border: InputBorder.none,
-                                                filled: true,
-                                                fillColor: Colors.white38,
-                                                contentPadding:
-                                                    EdgeInsets.all(5.0),
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 10.0,
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(
-                                              vertical: 10.0,
-                                            ),
-                                            child: TextFormField(
-                                              controller: about,
-                                              autocorrect: false,
-                                              autofocus: false,
-                                              style: TextStyle(
-                                                fontSize: 15.0,
-                                              ),
-                                              validator: (value) =>
-                                                  value.isEmpty
-                                                      ? 'about can\'t be empty'
-                                                      : null,
-                                              onSaved: (value) => about.value,
-                                              decoration: InputDecoration(
-                                                hintText: "About",
-                                                labelText: "Describe Youreself",
-                                                border: InputBorder.none,
-                                                filled: true,
-                                                fillColor: Colors.white38,
-                                                contentPadding:
-                                                    EdgeInsets.all(5.0),
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 10.0,
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(
-                                              vertical: 10.0,
-                                            ),
-                                            child: TextFormField(
-                                              controller: mobile,
-                                              autocorrect: false,
-                                              autofocus: false,
-                                              style: TextStyle(
-                                                fontSize: 15.0,
-                                              ),
-                                              validator: (value) =>
-                                                  value.isEmpty
-                                                      ? 'Mobile can\'t be empty'
-                                                      : null,
-                                              onSaved: (value) => mobile.value,
-                                              decoration: InputDecoration(
-                                                hintText: "Mobile",
-                                                labelText: "Enter Your Mobile",
-                                                border: InputBorder.none,
-                                                filled: true,
-                                                fillColor: Colors.white38,
-                                                contentPadding:
-                                                    EdgeInsets.all(5.0),
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 10.0,
-                                          ),
-                                          Row(
-                                            // crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceEvenly,
-                                            children: <Widget>[
-                                              Container(
-                                                child: Expanded(
-                                                  child: Padding(
-                                                    padding: EdgeInsets.only(
-                                                        left: 50.0,
-                                                        right: 50.0,
-                                                        top: 10.0,
-                                                        bottom: 10.0),
-                                                    child: Container(
-                                                      alignment:
-                                                          Alignment.center,
-                                                      height: 60.0,
-                                                      child: MaterialButton(
-                                                        minWidth: 120.0,
-                                                        height: 50.0,
-                                                        color: Theme.of(context)
-                                                            .primaryColor,
-                                                        padding: EdgeInsets
-                                                            .symmetric(
-                                                          horizontal: 10.0,
-                                                        ),
-                                                        child: Text(
-                                                          "Continue",
-                                                          style: TextStyle(
-                                                            fontSize: 18.0,
-                                                            color:
-                                                                Colors.white70,
-                                                          ),
-                                                        ),
-                                                        onPressed: () {
-                                                          if (_image == null) {
-                                                            var snackBar =
-                                                                SnackBar(
-                                                              content: Text(
-                                                                  "Please Choose A Profile Picture & Fill Your Details."),
-                                                            );
-                                                            Scaffold.of(context)
-                                                                .showSnackBar(
-                                                                    snackBar);
-                                                          } else {
-                                                            _validateAndSubmit(
-                                                                context);
-                                                          }
-                                                          // uploadPic(context);
-                                                          // print("${widget.username}");
-                                                          // print("${widget.email}");
-                                                          // print("${widget.sender}");
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          SizedBox(
+                            height: 20.0,
+                          ),
+                          Text(
+                            "Uploading File : $progressString",
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
                         ],
                       ),
-                      childCount: 1,
                     ),
+                  )
+                : CustomScrollView(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: false,
+                    slivers: <Widget>[
+                      new SliverPadding(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0),
+                        sliver: new SliverList(
+                          delegate: new SliverChildBuilderDelegate(
+                            (context, index) => new Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Container(
+                                  margin: EdgeInsets.only(left: 35.0),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      SizedBox(
+                                        height: 20.0,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Align(
+                                            alignment: Alignment.center,
+                                            child: CircleAvatar(
+                                              radius: 100.0,
+                                              backgroundColor:
+                                                  Theme.of(context).splashColor,
+                                              child: ClipOval(
+                                                child: SizedBox(
+                                                  width: 200.0,
+                                                  height: 200.0,
+                                                  child: (_image != null)
+                                                      ? Image.file(_image,
+                                                          fit: BoxFit.fill)
+                                                      : Image.asset(
+                                                          'assets/images/demo-avatar.png',
+                                                          fit: BoxFit.fill,
+                                                        ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding:
+                                                EdgeInsets.only(top: 130.0),
+                                            child: IconButton(
+                                              icon: Icon(
+                                                Icons.camera,
+                                                size: 30.0,
+                                                color: Theme.of(context)
+                                                    .primaryColor,
+                                              ),
+                                              onPressed: () {
+                                                _getImage();
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 0.0),
+                                  child: Stack(
+                                    children: <Widget>[
+                                      SingleChildScrollView(
+                                        child: Container(
+                                          height: 510.0,
+                                          width: 320.0,
+                                          margin: EdgeInsets.only(top: 10.0),
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 10.0,
+                                            vertical: 10.0,
+                                          ),
+                                          child: Form(
+                                            key: formKey,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: <Widget>[
+                                                SizedBox(
+                                                  height: 10.0,
+                                                ),
+                                                Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                    vertical: 10.0,
+                                                  ),
+                                                  child: TextFormField(
+                                                    controller: name,
+                                                    autocorrect: false,
+                                                    autofocus: false,
+                                                    style: TextStyle(
+                                                      fontSize: 15.0,
+                                                    ),
+                                                    validator: (value) => value
+                                                            .isEmpty
+                                                        ? 'name can\'t be empty'
+                                                        : null,
+                                                    onSaved: (value) =>
+                                                        name.value,
+                                                    decoration: InputDecoration(
+                                                      hintText: "Name",
+                                                      labelText:
+                                                          "Enter Your Name",
+                                                      border: InputBorder.none,
+                                                      filled: true,
+                                                      fillColor: Colors.white38,
+                                                      contentPadding:
+                                                          EdgeInsets.all(5.0),
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: 10.0,
+                                                ),
+                                                Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                    vertical: 10.0,
+                                                  ),
+                                                  child: TextFormField(
+                                                    controller: birthday,
+                                                    autocorrect: false,
+                                                    autofocus: false,
+                                                    style: TextStyle(
+                                                      fontSize: 15.0,
+                                                    ),
+                                                    validator: (value) => value
+                                                            .isEmpty
+                                                        ? 'age can\'t be empty'
+                                                        : null,
+                                                    onSaved: (value) =>
+                                                        birthday.value,
+                                                    decoration: InputDecoration(
+                                                      hintText: "Birthday",
+                                                      labelText:
+                                                          "Enter Your Birthday",
+                                                      border: InputBorder.none,
+                                                      filled: true,
+                                                      fillColor: Colors.white38,
+                                                      contentPadding:
+                                                          EdgeInsets.all(5.0),
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: 10.0,
+                                                ),
+                                                Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                    vertical: 10.0,
+                                                  ),
+                                                  child: TextFormField(
+                                                    controller: about,
+                                                    autocorrect: false,
+                                                    autofocus: false,
+                                                    style: TextStyle(
+                                                      fontSize: 15.0,
+                                                    ),
+                                                    validator: (value) => value
+                                                            .isEmpty
+                                                        ? 'about can\'t be empty'
+                                                        : null,
+                                                    onSaved: (value) =>
+                                                        about.value,
+                                                    decoration: InputDecoration(
+                                                      hintText: "About",
+                                                      labelText:
+                                                          "Describe Youreself",
+                                                      border: InputBorder.none,
+                                                      filled: true,
+                                                      fillColor: Colors.white38,
+                                                      contentPadding:
+                                                          EdgeInsets.all(5.0),
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: 10.0,
+                                                ),
+                                                Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                    vertical: 10.0,
+                                                  ),
+                                                  child: TextFormField(
+                                                    controller: mobile,
+                                                    autocorrect: false,
+                                                    autofocus: false,
+                                                    style: TextStyle(
+                                                      fontSize: 15.0,
+                                                    ),
+                                                    validator: (value) => value
+                                                            .isEmpty
+                                                        ? 'Mobile can\'t be empty'
+                                                        : null,
+                                                    onSaved: (value) =>
+                                                        mobile.value,
+                                                    decoration: InputDecoration(
+                                                      hintText: "Mobile",
+                                                      labelText:
+                                                          "Enter Your Mobile",
+                                                      border: InputBorder.none,
+                                                      filled: true,
+                                                      fillColor: Colors.white38,
+                                                      contentPadding:
+                                                          EdgeInsets.all(5.0),
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: 10.0,
+                                                ),
+                                                Row(
+                                                  // crossAxisAlignment: CrossAxisAlignment.start,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceEvenly,
+                                                  children: <Widget>[
+                                                    Container(
+                                                      child: Expanded(
+                                                        child: Padding(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 50.0,
+                                                                  right: 50.0,
+                                                                  top: 10.0,
+                                                                  bottom: 10.0),
+                                                          child: Container(
+                                                            alignment: Alignment
+                                                                .center,
+                                                            height: 60.0,
+                                                            child:
+                                                                MaterialButton(
+                                                              minWidth: 120.0,
+                                                              height: 50.0,
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .primaryColor,
+                                                              padding: EdgeInsets
+                                                                  .symmetric(
+                                                                horizontal:
+                                                                    10.0,
+                                                              ),
+                                                              child: Text(
+                                                                "Continue",
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize:
+                                                                      18.0,
+                                                                  color: Colors
+                                                                      .white70,
+                                                                ),
+                                                              ),
+                                                              onPressed: () {
+                                                                if (_image ==
+                                                                    null) {
+                                                                  var snackBar =
+                                                                      SnackBar(
+                                                                    content: Text(
+                                                                        "Please Choose A Profile Picture & Fill Your Details."),
+                                                                  );
+                                                                  Scaffold.of(
+                                                                          context)
+                                                                      .showSnackBar(
+                                                                          snackBar);
+                                                                } else {
+                                                                  _validateAndSubmit(
+                                                                      context);
+                                                                }
+                                                                // uploadPic(context);
+                                                                // print("${widget.username}");
+                                                                // print("${widget.email}");
+                                                                // print("${widget.sender}");
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            childCount: 1,
+                          ),
+                        ),
+                      )
+                    ],
                   ),
-                )
-              ],
-            ),
           ),
         ],
       ),
