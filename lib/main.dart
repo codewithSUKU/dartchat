@@ -10,9 +10,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: MainPage(),
       theme: ThemeData(
-        primarySwatch: Colors.blueGrey,
-        // brightness: Brightness.light,
-        accentColor: Colors.grey[300]
+        primarySwatch: Colors.red,
+        brightness: Brightness.light,
+        accentColor: Colors.red[300]
       ),
     );
   }
